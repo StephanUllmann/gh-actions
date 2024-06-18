@@ -1,0 +1,16 @@
+name: Test and Deploy
+on:
+  push:
+    branches: ['main', 'dev']
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm run test
