@@ -29,38 +29,66 @@ jobs:
       - name: Greet
         run: echo "Hello, Team!"
 
-  build:
-    needs: test
+  # build:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get Code
+  #       uses: actions/checkout@v4
+  #     - name: Cache dependencies
+  #       uses: actions/cache@v4
+  #       id: cache
+  #       with:
+  #         path: node_modules
+  #         key: dependencies-${{hashFiles('**/package-lock.json')}}
+  #     - name: Install dependencies
+  #       if: steps.cache.outputs.cache-hit != 'true'
+  #       run: npm ci
+  #     - name: Build
+  #       run: npm run build
+  #     - name: Upload Pages Artifact
+  #       uses: actions/upload-pages-artifact@v3
+  #       with:
+  #         path: ./dist
+  #         name: myApp
+
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: github-pages
+  #     url: ${{steps.deployment.outputs.page_url}}
+  #   steps:
+  #     - name: Deploy to GH pages
+  #       id: deployment
+  #       uses: actions/deploy-pages@v4
+  #       with:
+  #         artifact_name: myApp
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Get Code
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        id: cache
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          path: node_modules
-          key: dependencies-${{hashFiles('**/package-lock.json')}}
+          node-version: 20
+          cache: 'npm'
       - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Build
         run: npm run build
-      - name: Upload Pages Artifact
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
-          name: myApp
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{steps.deployment.outputs.page_url}}
-    steps:
-      - name: Deploy to GH pages
+          # Upload dist folder
+          path: './dist'
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: myApp
